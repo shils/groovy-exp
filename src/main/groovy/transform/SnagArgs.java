@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * method in a try block and adds a catch block as described above.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 @GroovyASTTransformationClass("transform.SnagArgsASTTransformation")
 public @interface SnagArgs{
 
