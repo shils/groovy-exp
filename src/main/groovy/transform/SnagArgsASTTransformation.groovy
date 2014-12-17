@@ -30,6 +30,11 @@ import static org.codehaus.groovy.ast.tools.GeneralUtils.declS
 import static org.codehaus.groovy.ast.tools.GeneralUtils.stmt
 import static org.codehaus.groovy.ast.tools.GeneralUtils.varX
 
+/**
+ * Handles generation of code for the {@link SnagArgs} annotation.
+ *
+ * @author Shil Sinha
+ */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
 class SnagArgsASTTransformation extends AbstractASTTransformation {
@@ -51,6 +56,12 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
     if (MY_TYPE != annotationNode.classNode || !(annotatedNode instanceof MethodNode))
       return
 
+    ClassNode exceptionType = getMemberClassValue(annotationNode, "exception", DEFAULT_EXCEPTION_TYPE)
+    if (!exceptionType.isDerivedFrom(EXCEPTION_TYPE)) {
+      addError("{$exceptionType.name} is not derived from ${EXCEPTION_TYPE.name}", annotationNode)
+      return
+    }
+
     MethodNode methodNode = (MethodNode) annotatedNode
     if (methodNode.isAbstract()) {
       addError("Annotation " + MY_TYPE_NAME + " cannot be used for abstract methods.", methodNode)
@@ -61,12 +72,6 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
     List<String> invalidParams = validateParams(methodNode, paramsToSnag)
     if (!invalidParams.isEmpty()) {
       addError("$invalidParams are not parameter names for this method", methodNode)
-      return
-    }
-
-    ClassNode exceptionType = getMemberClassValue(annotationNode, "exception", DEFAULT_EXCEPTION_TYPE)
-    if (!exceptionType.isDerivedFrom(EXCEPTION_TYPE)) {
-      addError("{$exceptionType.name} is not derived from ${EXCEPTION_TYPE.name}", methodNode)
       return
     }
 
@@ -104,7 +109,7 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
   }
 
   private static List<String> validateParams(MethodNode methodNode, List<String> paramsToSnag) {
-    return paramsToSnag.findAll() { String paramName ->
+    return paramsToSnag.findAll { String paramName ->
       methodNode.parameters.every { Parameter it -> it.name != paramName }
     } as List<String>
   }

@@ -14,6 +14,8 @@ import java.lang.annotation.Target;
  * The {@code @SnagArgs} annotation instructs the compiler to execute the AST transformation
  * in {@link transform.SnagArgsASTTransformation}, which places the body of the annotated
  * method in a try block and adds a catch block as described above.
+ *
+ * @author Shil Sinha
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
