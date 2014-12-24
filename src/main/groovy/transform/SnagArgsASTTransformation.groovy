@@ -64,7 +64,12 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
 
     MethodNode methodNode = (MethodNode) annotatedNode
     if (methodNode.isAbstract()) {
-      addError("Annotation " + MY_TYPE_NAME + " cannot be used for abstract methods.", methodNode)
+      addError("Annotation " + MY_TYPE_NAME + " cannot be used for abstract methods", methodNode)
+      return
+    }
+
+    if (methodNode.parameters.length == 0) {
+      addError("Annotation " + MY_TYPE_NAME + " cannot be used for parameter-less methods", methodNode)
       return
     }
 
