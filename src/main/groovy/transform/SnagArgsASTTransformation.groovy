@@ -10,6 +10,7 @@ import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.expr.MethodCallExpression
+import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.CatchStatement
 import org.codehaus.groovy.ast.stmt.EmptyStatement
@@ -41,7 +42,7 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
 
   static final Class<SnagArgs> MY_CLASS = SnagArgs.class
   static final ClassNode MY_TYPE = make(MY_CLASS)
-  static final String MY_TYPE_NAME = "@" + MY_TYPE.getNameWithoutPackage()
+  static final String MY_TYPE_NAME = "@" + MY_TYPE.nameWithoutPackage
   static final ClassNode EXCEPTION_TYPE = make(Exception.class)
   static final ClassNode DEFAULT_EXCEPTION_TYPE = EXCEPTION_TYPE
   static final ClassNode SNAGGED_EXCEPTION_TYPE = make(SnaggedException.class)
@@ -59,13 +60,11 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
     ClassNode exceptionType = getMemberClassValue(annotationNode, "exception", DEFAULT_EXCEPTION_TYPE)
     if (!exceptionType.isDerivedFrom(EXCEPTION_TYPE)) {
       addError("{$exceptionType.name} is not derived from ${EXCEPTION_TYPE.name}", annotationNode)
-      return
     }
 
     MethodNode methodNode = (MethodNode) annotatedNode
     if (methodNode.isAbstract()) {
       addError("Annotation " + MY_TYPE_NAME + " cannot be used for abstract methods", methodNode)
-      return
     }
 
     if (methodNode.parameters.length == 0) {
@@ -80,18 +79,21 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
       return
     }
 
-    methodNode.setCode(calculateSnagArgsStatements(methodNode, paramsToSnag, exceptionType))
+    boolean captureAtException = memberHasValue(annotationNode, "captureAtException", true)
+    methodNode.setCode(calculateSnagArgsStatements(methodNode, paramsToSnag, exceptionType, captureAtException))
   }
 
-  private Statement calculateSnagArgsStatements(MethodNode methodNode, List<String> paramsToSnag, ClassNode exceptionType) {
+  private Statement calculateSnagArgsStatements(MethodNode methodNode, List<String> paramsToSnag, ClassNode exceptionType, boolean captureAtException) {
     BlockStatement newBody = new BlockStatement()
-    paramsToSnag.each { String paramName ->
-      newBody.addStatement(snagS(paramName))
+    if (!captureAtException) {
+      paramsToSnag.each { String paramName ->
+        newBody.addStatement(snagS(paramName))
+      }
     }
 
     Statement finallyStatement = EmptyStatement.INSTANCE
-    Statement tryCatchBlock = new TryCatchStatement(methodNode.getCode(), finallyStatement)
-    tryCatchBlock.addCatch(catchS(paramsToSnag, exceptionType))
+    Statement tryCatchBlock = new TryCatchStatement(methodNode.code, finallyStatement)
+    tryCatchBlock.addCatch(catchS(paramsToSnag, exceptionType, captureAtException))
     newBody.addStatement(tryCatchBlock)
     return newBody
   }
@@ -101,13 +103,13 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
       return declS(argCopyX, varX(paramName))
   }
 
-  private static CatchStatement catchS(List<String> paramsToSnag, ClassNode exceptionType) {
+  private static CatchStatement catchS(List<String> paramsToSnag, ClassNode exceptionType, boolean captureAtException) {
     BlockStatement catchBlock = new BlockStatement()
     Parameter catchParameter = new Parameter(exceptionType, "_ex")
     Expression argsMapX = varX("_args")
     catchBlock.addStatement(declS(argsMapX, ctorX(MAP_TYPE)))
     paramsToSnag.each { String paramName ->
-      catchBlock.addStatement(putS(argsMapX, paramName))
+      catchBlock.addStatement(putS(argsMapX, paramName, captureAtException))
     }
     catchBlock.addStatement(new ThrowStatement(ctorX(SNAGGED_EXCEPTION_TYPE, args(argsMapX, varX(catchParameter)))))
     return new CatchStatement(catchParameter, catchBlock)
@@ -119,8 +121,9 @@ class SnagArgsASTTransformation extends AbstractASTTransformation {
     } as List<String>
   }
 
-  private static Statement putS(Expression result, String paramName) {
-    MethodCallExpression put = callX(result, "put", args(constX(paramName), varX("_" + paramName)))
+  private static Statement putS(Expression result, String paramName, boolean captureAtException) {
+    VariableExpression paramX = captureAtException ? varX(paramName) : varX("_" + paramName)
+    MethodCallExpression put = callX(result, "put", args(constX(paramName), paramX))
     put.setImplicitThis(false)
     return stmt(put)
   }
