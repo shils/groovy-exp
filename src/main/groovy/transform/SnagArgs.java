@@ -33,4 +33,9 @@ public @interface SnagArgs{
    */
   Class exception() default Exception.class;
 
+  /**
+   * Whether to capture the arguments after catching the exception or before executing the method (default)
+   */
+  boolean captureAtException() default false;
+
 }
