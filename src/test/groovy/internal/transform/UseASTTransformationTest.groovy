@@ -1,31 +1,49 @@
 package internal.transform
 
+import groovy.transform.NotYetImplemented
+
 
 class UseASTTransformationTest extends GroovyTestCase {
 
   void test1() {
     assertScript '''
       import transform.Use
+      import groovy.time.TimeCategory
+      import groovy.time.TimeDuration
+      import groovy.transform.CompileStatic
 
-      class B {
-
-        static String blah(Date d){
-          'Hello'
-        }
-      }
-
+      @CompileStatic
       class A {
 
-        @Use(B.class)
-        String a1(){
-          Date d = new Date()
-          d.blah()
+        @Use(TimeCategory.class)
+        TimeDuration minutes(Integer t){
+          t.getMinutes()
         }
       }
 
-      assert new A().a1() == 'Hello'
+      assert new A().minutes(3) == TimeCategory.getMinutes(3)
     '''
+  }
 
+  @NotYetImplemented
+  void testPropertyAccess() {
+    assertScript '''
+      import transform.Use
+      import groovy.time.TimeCategory
+      import groovy.time.TimeDuration
+      import groovy.transform.CompileStatic
+
+      @CompileStatic
+      class A {
+
+        @Use(TimeCategory.class)
+        TimeDuration minutes(Integer t){
+          t.minutes
+        }
+      }
+
+      assert new A().minutes(3) == TimeCategory.getMinutes(3)
+    '''
   }
 
 
