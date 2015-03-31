@@ -12,14 +12,14 @@ import java.lang.annotation.Target;
  * passing in the caught exception and a map of the method arguments for the exception throwing invocation.
  * <p/>
  * The {@code @SnagArgs} annotation instructs the compiler to execute the AST transformation
- * in {@link transform.SnagArgsASTTransformation}, which places the body of the annotated
+ * in {@link internal.transform.SnagArgsASTTransformation}, which places the body of the annotated
  * method in a try block and adds a catch block as described above.
  *
  * @author Shil Sinha
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
-@GroovyASTTransformationClass("transform.SnagArgsASTTransformation")
+@GroovyASTTransformationClass("internal.transform.SnagArgsASTTransformation")
 public @interface SnagArgs{
 
   /**
