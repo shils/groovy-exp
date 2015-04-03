@@ -13,6 +13,7 @@ import org.codehaus.groovy.ast.expr.ClassExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.expr.MethodCallExpression
+import org.codehaus.groovy.ast.expr.PropertyExpression
 import org.codehaus.groovy.ast.expr.TupleExpression
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
@@ -81,17 +82,35 @@ class UseASTTransformation extends AbstractASTTransformation {
     @Override
     Expression transform(Expression expression) {
       Expression expr = super.transform(expression)
-      if (isEligibleForReplacement(expr)) {
-        MethodCallExpression mce = (MethodCallExpression) expr
-        List<Expression> categoryMethodCallArgs = generateCategoryMethodCallArgs(mce)
-        MethodNode replacement = findMatchingCategoryMethod(mce.methodAsString, categoryMethodCallArgs)
-        if (replacement) {
-          Expression smce = callX(category, replacement.name, args(categoryMethodCallArgs))
-          smce.setSourcePosition(mce)
-          return smce
-        }
+      if (expr instanceof MethodCallExpression && expr.getMethod() instanceof ConstantExpression) {
+        return transformMethodCallExpression((MethodCallExpression) expr)
+      } else if (expr instanceof PropertyExpression && expr.getProperty() instanceof ConstantExpression) {
+        return transformPropertyExpression((PropertyExpression) expr)
       }
       return expr
+    }
+
+    private Expression transformMethodCallExpression(MethodCallExpression mce) {
+      List<Expression> categoryMethodCallArgs = generateCategoryMethodCallArgs(mce)
+      Expression transformed = generateCategoryMethodCallExpression(mce.methodAsString, categoryMethodCallArgs)
+      transformed?.setSourcePosition(mce)
+      return transformed ?: mce
+    }
+
+    private Expression transformPropertyExpression(PropertyExpression pe) {
+      List<Expression> categoryMethodCallArgs = [pe.objectExpression]
+      Expression transformed = generateCategoryMethodCallExpression("get${pe.propertyAsString.capitalize()}".toString(), categoryMethodCallArgs)
+      transformed?.setSourcePosition(pe)
+      return transformed ?: pe
+    }
+
+    private Expression generateCategoryMethodCallExpression(String name, List<Expression> categoryMethodCallArgs) {
+      MethodNode replacement = findMatchingCategoryMethod(name, categoryMethodCallArgs)
+      if (replacement) {
+        Expression smce = callX(category, replacement.name, args(categoryMethodCallArgs))
+        return smce
+      }
+      return null
     }
 
     private MethodNode findMatchingCategoryMethod(String name, List<Expression> categoryMethodCallArgs) {
@@ -105,19 +124,15 @@ class UseASTTransformation extends AbstractASTTransformation {
       return method.isStatic() && method.isPublic() && method.parameters && !method.parameters[0].dynamicTyped
     }
 
-    private static boolean isEligibleForReplacement(Expression expr) {
-      return expr instanceof MethodCallExpression && expr.method instanceof ConstantExpression
-    }
-
     private static List<Expression> generateCategoryMethodCallArgs(MethodCallExpression mce) {
-      List<Expression> argXList = [mce.objectExpression]
-      argXList.addAll(((TupleExpression) mce.arguments).expressions)
-      return argXList
+      List<Expression> argList = [mce.objectExpression]
+      argList.addAll(((TupleExpression) mce.arguments).expressions)
+      return argList
     }
 
-    private static boolean parametersMatchArgs(Parameter[] params, List<Expression> argXList) {
+    private static boolean parametersMatchArgs(Parameter[] params, List<Expression> argList) {
       for (int i = 0; i < params.length; i++) {
-        if (argXList[i].type != params[i].type)
+        if (argList[i].type != params[i].type)
           return false
       }
       return true

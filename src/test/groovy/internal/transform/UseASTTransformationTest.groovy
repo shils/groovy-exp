@@ -25,7 +25,6 @@ class UseASTTransformationTest extends GroovyTestCase {
     '''
   }
 
-  @NotYetImplemented
   void testPropertyAccess() {
     assertScript '''
       import transform.Use
