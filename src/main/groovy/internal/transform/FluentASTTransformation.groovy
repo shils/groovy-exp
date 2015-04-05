@@ -7,11 +7,8 @@ import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.FieldNode
 import org.codehaus.groovy.ast.MethodNode
-import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.BlockStatement
-import org.codehaus.groovy.ast.stmt.Statement
-import org.codehaus.groovy.ast.tools.GeneralUtils
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.AbstractASTTransformation
@@ -39,7 +36,7 @@ class FluentASTTransformation extends AbstractASTTransformation {
     AnnotationNode anno = (AnnotationNode) nodes[0]
     AnnotatedNode target = (AnnotatedNode) nodes[1]
 
-    if (anno != MY_TYPE)
+    if (MY_TYPE != anno.classNode)
       return
     if (!(target instanceof ClassNode))
       return
@@ -51,8 +48,6 @@ class FluentASTTransformation extends AbstractASTTransformation {
         addSetter(cNode, pNode.field)
       }
     }
-
-
   }
 
   void addSetter(ClassNode cNode, FieldNode fNode) {
