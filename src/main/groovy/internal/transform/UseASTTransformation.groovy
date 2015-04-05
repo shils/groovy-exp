@@ -5,6 +5,7 @@ import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.AnnotatedNode
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassCodeExpressionTransformer
+import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
@@ -20,12 +21,13 @@ import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import transform.Use
-import org.codehaus.groovy.ast.ClassHelper
 
+import static org.codehaus.groovy.ast.ClassHelper.getWrapper
 import static org.codehaus.groovy.ast.tools.GeneralUtils.args
 import static org.codehaus.groovy.ast.tools.GeneralUtils.callX
-
+import static org.codehaus.groovy.transform.stc.StaticTypeCheckingSupport.implementsInterfaceOrIsSubclassOf
 import static org.codehaus.groovy.ast.ClassHelper.make
+import static org.codehaus.groovy.ast.ClassHelper.DYNAMIC_TYPE
 
 
 @CompileStatic
@@ -92,20 +94,20 @@ class UseASTTransformation extends AbstractASTTransformation {
 
     private Expression transformMethodCallExpression(MethodCallExpression mce) {
       List<Expression> categoryMethodCallArgs = generateCategoryMethodCallArgs(mce)
-      Expression transformed = generateCategoryMethodCallExpression(mce.methodAsString, categoryMethodCallArgs)
+      Expression transformed = generateCategoryMethodCallExpression(mce.methodAsString, categoryMethodCallArgs, mce.type)
       transformed?.setSourcePosition(mce)
       return transformed ?: mce
     }
 
     private Expression transformPropertyExpression(PropertyExpression pe) {
       List<Expression> categoryMethodCallArgs = [pe.objectExpression]
-      Expression transformed = generateCategoryMethodCallExpression("get${pe.propertyAsString.capitalize()}".toString(), categoryMethodCallArgs)
+      Expression transformed = generateCategoryMethodCallExpression('get' + pe.propertyAsString.capitalize(), categoryMethodCallArgs, pe.type)
       transformed?.setSourcePosition(pe)
       return transformed ?: pe
     }
 
-    private Expression generateCategoryMethodCallExpression(String name, List<Expression> categoryMethodCallArgs) {
-      MethodNode replacement = findMatchingCategoryMethod(name, categoryMethodCallArgs)
+    private Expression generateCategoryMethodCallExpression(String name, List<Expression> categoryMethodCallArgs, ClassNode returnType) {
+      MethodNode replacement = findMatchingCategoryMethod(name, categoryMethodCallArgs, returnType)
       if (replacement) {
         Expression smce = callX(category, replacement.name, args(categoryMethodCallArgs))
         return smce
@@ -113,15 +115,15 @@ class UseASTTransformation extends AbstractASTTransformation {
       return null
     }
 
-    private MethodNode findMatchingCategoryMethod(String name, List<Expression> categoryMethodCallArgs) {
+    private MethodNode findMatchingCategoryMethod(String name, List<Expression> categoryMethodCallArgs, ClassNode returnType) {
       categoryMethods[name]?.find { MethodNode candidate ->
-        if (parametersMatchArgs(candidate.parameters, categoryMethodCallArgs))
-          return candidate
+        parametersMatchArgs(candidate.parameters, categoryMethodCallArgs) &&
+                implementsInterfaceOrIsSubclassOf(candidate.returnType, returnType)
       }
     }
 
     private static boolean isCategoryMethod(MethodNode method) {
-      return method.isStatic() && method.isPublic() && method.parameters && !method.parameters[0].dynamicTyped
+      return method.isStatic() && method.isPublic() && method.parameters
     }
 
     private static List<Expression> generateCategoryMethodCallArgs(MethodCallExpression mce) {
@@ -132,7 +134,9 @@ class UseASTTransformation extends AbstractASTTransformation {
 
     private static boolean parametersMatchArgs(Parameter[] params, List<Expression> argList) {
       for (int i = 0; i < params.length; i++) {
-        if (argList[i].type != params[i].type)
+        ClassNode paramType = getWrapper(params[i].type)
+        ClassNode argType = getWrapper(argList[i].type)
+        if (!implementsInterfaceOrIsSubclassOf(argType, paramType))
           return false
       }
       return true
