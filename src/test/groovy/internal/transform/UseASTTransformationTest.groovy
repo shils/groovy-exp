@@ -1,12 +1,8 @@
 package internal.transform
 
-import groovy.transform.CompileStatic
-import transform.Use
-
-
 class UseASTTransformationTest extends GroovyTestCase {
 
-  void test1() {
+  void testAnnotatedMethod() {
     assertScript '''
       import transform.Use
       import groovy.time.TimeCategory
@@ -17,6 +13,26 @@ class UseASTTransformationTest extends GroovyTestCase {
       class A {
 
         @Use(TimeCategory.class)
+        TimeDuration minutes(Integer t){
+          t.getMinutes()
+        }
+      }
+
+      assert new A().minutes(3) == TimeCategory.getMinutes(3)
+    '''
+  }
+
+  void testAnnotatedClass() {
+    assertScript '''
+      import transform.Use
+      import groovy.time.TimeCategory
+      import groovy.time.TimeDuration
+      import groovy.transform.CompileStatic
+
+      @CompileStatic
+      @Use(TimeCategory.class)
+      class A {
+
         TimeDuration minutes(Integer t){
           t.getMinutes()
         }

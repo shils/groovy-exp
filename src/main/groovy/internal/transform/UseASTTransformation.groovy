@@ -46,15 +46,17 @@ class UseASTTransformation extends AbstractASTTransformation {
     if (MY_TYPE != annotationNode.classNode)
       return
 
-    if (!(annotatedNode instanceof MethodNode))
-      return
-
-    MethodNode method = (MethodNode) annotatedNode
     ClassNode category = getMemberClassValue(annotationNode, 'value')
     CategoryMethodCallExpressionTransformer transformer = new CategoryMethodCallExpressionTransformer(sourceUnit, category)
     transformer.init()
-    if (transformer.categoryMethods)
-      transformer.visitMethod(method)
+    if (!transformer.categoryMethods)
+      return
+
+    if (annotatedNode instanceof MethodNode) {
+      transformer.visitMethod((MethodNode) annotatedNode)
+    } else if (annotatedNode instanceof ClassNode) {
+      transformer.visitClass((ClassNode) annotatedNode)
+    }
   }
 
   private static class CategoryMethodCallExpressionTransformer extends ClassCodeExpressionTransformer {
@@ -90,6 +92,21 @@ class UseASTTransformation extends AbstractASTTransformation {
         return transformPropertyExpression((PropertyExpression) expr)
       }
       return expr
+    }
+
+    @Override
+    void visitMethod(MethodNode method) {
+      if (!hasDifferentCategory(method))
+        super.visitMethod(method)
+    }
+
+    private boolean hasDifferentCategory(MethodNode method) {
+      List<AnnotationNode> overridingAnnotations = method.getAnnotations(MY_TYPE)
+      if (!overridingAnnotations)
+        return false
+
+      Expression methodCategory = overridingAnnotations[0].getMember('value')
+      return methodCategory instanceof ClassExpression && methodCategory.type != category
     }
 
     private Expression transformMethodCallExpression(MethodCallExpression mce) {
