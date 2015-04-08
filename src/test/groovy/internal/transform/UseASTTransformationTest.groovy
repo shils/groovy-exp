@@ -42,6 +42,39 @@ class UseASTTransformationTest extends GroovyTestCase {
     '''
   }
 
+  void testAnnotatedMethodOverridesClass() {
+    assertScript '''
+      import transform.Use
+      import groovy.time.TimeCategory
+      import groovy.time.TimeDuration
+      import groovy.transform.CompileStatic
+
+      @CompileStatic
+      @Use(TimeCategory.class)
+      class A {
+
+        TimeDuration minutes(Integer t){
+          t.getMinutes()
+        }
+
+        @Use(FakeTimeCategory.class)
+        TimeDuration doubleMinutes(Integer t) {
+          t.getMinutes()
+        }
+      }
+
+      class FakeTimeCategory {
+        static TimeDuration getMinutes(Integer t){
+          TimeCategory.getMinutes(2*t)
+        }
+      }
+
+      A a  = new A()
+      assert a.minutes(3) == TimeCategory.getMinutes(3)
+      assert a.doubleMinutes(3) == FakeTimeCategory.getMinutes(3)
+    '''
+  }
+
   void testPropertyAccess() {
     assertScript '''
       import transform.Use
