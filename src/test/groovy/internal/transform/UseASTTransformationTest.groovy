@@ -95,6 +95,31 @@ class UseASTTransformationTest extends GroovyTestCase {
     '''
   }
 
+  void testUsingStaticClass() {
+    assertScript '''
+      import transform.Use
+      import groovy.transform.CompileStatic
+
+      @CompileStatic
+      class A {
+
+        @Use(IntCat.class)
+        int multiply(int a, int b){
+          a.times(b)
+        }
+
+        static class IntCat {
+          static int times(int a, int b) {
+            a*b
+          }
+        }
+
+      }
+
+      assert new A().multiply(3,4) == A.IntCat.times(3,4)
+    '''
+  }
+
   void testPrimitiveTypeCompatibility() {
     assertScript '''
       import groovy.transform.CompileStatic
