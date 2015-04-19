@@ -47,16 +47,31 @@ class UseASTTransformation extends AbstractASTTransformation {
       return
 
     ClassNode category = getMemberClassValue(annotationNode, 'value')
-    CategoryMethodCallExpressionTransformer transformer = new CategoryMethodCallExpressionTransformer(sourceUnit, category)
-    transformer.init()
-    if (!transformer.categoryMethods)
+    Map<String, List<MethodNode>> categoryMethods = findAllCategoryMethods(category)
+    if (!categoryMethods){
+      addError("The class ${category.getNameWithoutPackage()} does not contain any eligible category (public static) methods", annotationNode)
       return
+    }
 
+    CategoryMethodCallExpressionTransformer transformer = new CategoryMethodCallExpressionTransformer(sourceUnit, category, categoryMethods)
     if (annotatedNode instanceof MethodNode) {
       transformer.visitMethod((MethodNode) annotatedNode)
     } else if (annotatedNode instanceof ClassNode) {
       transformer.visitClass((ClassNode) annotatedNode)
     }
+  }
+
+  private static Map<String, List<MethodNode>> findAllCategoryMethods(ClassNode category) {
+    Map<String, List<MethodNode>> categoryMethods = new HashMap<String, List<MethodNode>>()
+    for (MethodNode method: category.getMethods()) {
+      if (isCategoryMethod(method))
+        categoryMethods.get(method.name, []) << method
+    }
+    return categoryMethods
+  }
+
+  private static boolean isCategoryMethod(MethodNode method) {
+    return method.isStatic() && method.isPublic() && method.parameters
   }
 
   private static class CategoryMethodCallExpressionTransformer extends ClassCodeExpressionTransformer {
@@ -65,17 +80,10 @@ class UseASTTransformation extends AbstractASTTransformation {
     private final ClassNode category
     private final Map<String, List<MethodNode>> categoryMethods
 
-    CategoryMethodCallExpressionTransformer(SourceUnit source, ClassNode category) {
+    CategoryMethodCallExpressionTransformer(SourceUnit source, ClassNode category, Map<String, List<MethodNode>> categoryMethods) {
       this.source = source
       this.category = category
-      categoryMethods = new HashMap<String, List<MethodNode>>()
-    }
-
-    void init() {
-      for (MethodNode method: category.getMethods()) {
-        if (isCategoryMethod(method))
-          categoryMethods.get(method.name, []) << method
-      }
+      this.categoryMethods = categoryMethods
     }
 
     @Override
@@ -137,10 +145,6 @@ class UseASTTransformation extends AbstractASTTransformation {
         parametersMatchArgs(candidate.parameters, categoryMethodCallArgs) &&
                 implementsInterfaceOrIsSubclassOf(candidate.returnType, returnType)
       }
-    }
-
-    private static boolean isCategoryMethod(MethodNode method) {
-      return method.isStatic() && method.isPublic() && method.parameters
     }
 
     private static List<Expression> generateCategoryMethodCallArgs(MethodCallExpression mce) {

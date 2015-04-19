@@ -1,5 +1,7 @@
 package internal.transform
 
+import org.codehaus.groovy.control.CompilationFailedException
+
 class UseASTTransformationTest extends GroovyTestCase {
 
   void testAnnotatedMethod() {
@@ -156,5 +158,17 @@ class UseASTTransformationTest extends GroovyTestCase {
       assert b.multiplyPrimitive(3,4) == 12
 
     '''
+  }
+
+  void testFailOnNonCategoryClass() {
+    shouldFail(CompilationFailedException, '''
+      import transform.Use
+      @Use(B)
+      class A {}
+
+      class B {
+        void instanceMethod(){}
+      }
+    ''')
   }
 }
