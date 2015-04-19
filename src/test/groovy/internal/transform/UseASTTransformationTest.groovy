@@ -156,7 +156,6 @@ class UseASTTransformationTest extends GroovyTestCase {
       B b = new B()
       assert b.multiplyObject(3,4) == 12
       assert b.multiplyPrimitive(3,4) == 12
-
     '''
   }
 
@@ -170,5 +169,69 @@ class UseASTTransformationTest extends GroovyTestCase {
         void instanceMethod(){}
       }
     ''')
+  }
+
+  void testMethodOverriding() {
+    assertScript '''
+      import transform.Use
+      import groovy.transform.CompileStatic
+
+      @CompileStatic
+      class A {
+
+        @Use(value = B.class, override = true)
+        char charAtOverridden(String text, int index){
+          text.charAt(index)
+        }
+
+        @Use(value = B.class)
+        char charAtNormal(String text, int index) {
+          text.charAt(index)
+        }
+
+        static class B {
+          static char charAt(String self, int index) {
+            self[-index - 1] as char
+          }
+        }
+      }
+
+      A a = new A()
+      assert a.charAtNormal('abc', 0) == 'abc'.charAt(0)
+      assert a.charAtOverridden('abc', 0) == A.B.charAt('abc', 0)
+    '''
+  }
+
+  void testPropertyOverriding(){
+    assertScript '''
+      import transform.Use
+      import groovy.transform.CompileStatic
+
+      @CompileStatic
+      class A {
+
+        @Use(value = B.class, override = true)
+        long timeOverridden(Date date){
+          date.time
+        }
+
+        @Use(value = B.class)
+        long timeNormal(Date date) {
+          date.time
+        }
+
+        static class B {
+          static long getTime(Date date) {
+            date.next().time
+          }
+        }
+      }
+
+      A a = new A()
+      Date now = new Date()
+      assert a.timeNormal(now) == now.time
+      assert a.timeOverridden(now) == A.B.getTime(now)
+    '''
+
   }
 }

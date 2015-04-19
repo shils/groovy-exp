@@ -13,4 +13,6 @@ import java.lang.annotation.Target
 @interface Use {
 
   Class value()
+
+  boolean override() default false
 }

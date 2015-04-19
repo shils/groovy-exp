@@ -52,8 +52,9 @@ class UseASTTransformation extends AbstractASTTransformation {
       addError("The class ${category.getNameWithoutPackage()} does not contain any eligible category (public static) methods", annotationNode)
       return
     }
+    boolean override = memberHasValue(annotationNode, 'override', true)
 
-    CategoryMethodCallExpressionTransformer transformer = new CategoryMethodCallExpressionTransformer(sourceUnit, category, categoryMethods)
+    CategoryMethodCallExpressionTransformer transformer = new CategoryMethodCallExpressionTransformer(sourceUnit, category, categoryMethods, override)
     if (annotatedNode instanceof MethodNode) {
       transformer.visitMethod((MethodNode) annotatedNode)
     } else if (annotatedNode instanceof ClassNode) {
@@ -79,11 +80,13 @@ class UseASTTransformation extends AbstractASTTransformation {
     private final SourceUnit source
     private final ClassNode category
     private final Map<String, List<MethodNode>> categoryMethods
+    private final boolean override
 
-    CategoryMethodCallExpressionTransformer(SourceUnit source, ClassNode category, Map<String, List<MethodNode>> categoryMethods) {
+    CategoryMethodCallExpressionTransformer(SourceUnit source, ClassNode category, Map<String, List<MethodNode>> categoryMethods, boolean override) {
       this.source = source
       this.category = category
       this.categoryMethods = categoryMethods
+      this.override = override
     }
 
     @Override
@@ -118,6 +121,11 @@ class UseASTTransformation extends AbstractASTTransformation {
     }
 
     private Expression transformMethodCallExpression(MethodCallExpression mce) {
+      if (!override) {
+        ClassNode receiverType = getWrapper(mce.objectExpression.type)
+        if (receiverType.hasPossibleMethod(mce.methodAsString, mce.arguments))
+          return mce
+      }
       List<Expression> categoryMethodCallArgs = generateCategoryMethodCallArgs(mce)
       Expression transformed = generateCategoryMethodCallExpression(mce.methodAsString, categoryMethodCallArgs, mce.type)
       transformed?.setSourcePosition(mce)
@@ -125,8 +133,14 @@ class UseASTTransformation extends AbstractASTTransformation {
     }
 
     private Expression transformPropertyExpression(PropertyExpression pe) {
+      String getterName = 'get' + pe.propertyAsString.capitalize()
+      if (!override) {
+        ClassNode receiverType = getWrapper(pe.objectExpression.type)
+        if (receiverType.hasProperty(pe.propertyAsString) || receiverType.getGetterMethod(getterName))
+          return pe
+      }
       List<Expression> categoryMethodCallArgs = [pe.objectExpression]
-      Expression transformed = generateCategoryMethodCallExpression('get' + pe.propertyAsString.capitalize(), categoryMethodCallArgs, pe.type)
+      Expression transformed = generateCategoryMethodCallExpression(getterName, categoryMethodCallArgs, pe.type)
       transformed?.setSourcePosition(pe)
       return transformed ?: pe
     }
