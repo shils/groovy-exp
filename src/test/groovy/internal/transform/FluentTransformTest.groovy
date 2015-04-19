@@ -1,6 +1,7 @@
 package internal.transform
 
 
+
 class FluentTransformTest extends GroovyTestCase {
 
   void testBasicFunctionality() {
@@ -8,7 +9,6 @@ class FluentTransformTest extends GroovyTestCase {
       import groovy.transform.CompileStatic
       import transform.Fluent
 
-      @CompileStatic
       @Fluent
       class Foo {
         int num
