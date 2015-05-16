@@ -29,7 +29,11 @@ import static org.codehaus.groovy.transform.stc.StaticTypeCheckingSupport.implem
 import static org.codehaus.groovy.ast.ClassHelper.make
 import static org.codehaus.groovy.ast.ClassHelper.DYNAMIC_TYPE
 
-
+/**
+ * Handles generation of code for the {@link Use} annotation.
+ *
+ * @author Shil Sinha
+ */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
 class UseASTTransformation extends AbstractASTTransformation {

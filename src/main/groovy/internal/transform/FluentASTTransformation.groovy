@@ -22,6 +22,11 @@ import static org.codehaus.groovy.ast.tools.GeneralUtils.propX
 import static org.codehaus.groovy.ast.tools.GeneralUtils.returnS
 import static org.codehaus.groovy.ast.tools.GeneralUtils.varX
 
+/**
+ * Handles generation of code for the {@link Fluent} annotation.
+ *
+ * @author Shil Sinha
+ */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 class FluentASTTransformation extends AbstractASTTransformation {
