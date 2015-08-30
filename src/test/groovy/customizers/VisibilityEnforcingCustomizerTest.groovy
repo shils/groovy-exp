@@ -2,86 +2,84 @@ package customizers
 
 import org.codehaus.groovy.control.CompilerConfiguration
 
-class VisibilityEnforcingCustomizerTest extends GroovyTestCase {
-  CompilerConfiguration configuration
-  VisibilityEnforcingCustomizer customizer
+class VisibilityEnforcingCustomizerTest extends GroovyShellTestCase {
 
-  void setUp() {
-    configuration = new CompilerConfiguration()
-    customizer = new VisibilityEnforcingCustomizer()
-    configuration.addCompilationCustomizers(customizer)
+  @Override
+  GroovyShell createNewShell() {
+    def config = new CompilerConfiguration()
+    config.addCompilationCustomizers(new VisibilityEnforcingCustomizer())
+    new GroovyShell(config)
   }
 
-  void testPrivateMethodsShouldNotBeAcessible(){
-    def shell = new GroovyShell(configuration)
-    shouldFail {
-      shell.evaluate '''
-        class A {
-          private void foo() {
-            print "I'm private"
-          }
+  void testPrivateMethodsShouldNotBeAccessible(){
+    shouldFail '''
+      class A {
+        private void foo() {
+          print "I'm private"
         }
+      }
 
-        class B {
-          void doAFoo(A a) {
-            a.foo()
-          }
+      class B {
+        void doAFoo(A a) {
+          a.foo()
         }
-        null
-      '''
-    }
-  }
-
-  void testPublicMethodsShouldBeAcessible(){
-    def shell = new GroovyShell(configuration)
-    shell.evaluate '''
-        class A {
-          public void foo() {
-            print "I'm public"
-          }
-        }
-
-        class B {
-          void doAFoo(A a) {
-            a.foo()
-          }
-        }
-        null
+      }
+      null
     '''
   }
 
-  void testPrivateFieldsShouldNotBeAcessible(){
-    def shell = new GroovyShell(configuration)
-    shouldFail {
-      shell.evaluate '''
-        class A {
-          private int x
+  void testPublicMethodsShouldBeAccessible(){
+    shell.evaluate '''
+      class A {
+        public void foo() {
+          print "I'm public"
         }
+      }
 
-        class B {
-          void printAX(A a) {
-            println a.x
-          }
+      class B {
+        void doAFoo(A a) {
+          a.foo()
         }
-        null
-      '''
-    }
+      }
+      null
+    '''
   }
 
-  void testPublicFieldsShouldBeAcessible(){
-    def shell = new GroovyShell(configuration)
-    shell.evaluate '''
-        class A {
-          public int x
-        }
+  void testPrivateFieldsShouldNotBeAccessible(){
+    shouldFail '''
+      class A {
+        private int x
+      }
 
-        class B {
-          void printAX(A a) {
-            println a.x
-          }
+      class B {
+        void printAX(A a) {
+          println a.x
         }
-        null
+      }
+      null
     '''
+  }
+
+  void testPublicFieldsShouldBeAccessible(){
+    shell.evaluate '''
+      class A {
+        public int x
+      }
+
+      class B {
+        void printAX(A a) {
+          println a.x
+        }
+      }
+      null
+    '''
+  }
+
+  @Override
+  String shouldFail(String script) {
+    shouldFail {
+      shell.evaluate(script)
+    }
   }
 
 }
