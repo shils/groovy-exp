@@ -22,7 +22,7 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
     '''
   }
 
-  void testFallThroughAfterEmptyCaseStatement() {
+  void testFallThroughAfterEmptyCaseStatementByDefault() {
     assertScript '''
       @transform.AutoBreak
       int test() {
@@ -37,6 +37,24 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
         return result
       }
       assert test() == 2
+    '''
+  }
+
+  void testBreakAfterEmptyCaseStatementWhenSpecified() {
+    assertScript '''
+      @transform.AutoBreak(includeEmptyCases = true)
+      int test() {
+        int result = 0
+        switch(1) {
+          case 1:
+          case 2:
+            result = 2
+          default:
+            result = 3
+        }
+        return result
+      }
+      assert test() == 0
     '''
   }
 

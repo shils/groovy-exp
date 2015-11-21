@@ -9,10 +9,13 @@ import org.codehaus.groovy.ast.ClassCodeVisitorSupport
 import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.expr.ConstantExpression
+import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.BreakStatement
 import org.codehaus.groovy.ast.stmt.CaseStatement
-import org.codehaus.groovy.ast.stmt.SwitchStatement
+import org.codehaus.groovy.ast.stmt.EmptyStatement
+import org.codehaus.groovy.ast.tools.GeneralUtils
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
@@ -32,6 +35,7 @@ class AutoBreakASTTransformation extends ClassCodeVisitorSupport implements ASTT
   static final ClassNode MY_TYPE = ClassHelper.make(MY_CLASS)
 
   SourceUnit sourceUnit
+  private boolean includeEmptyCases
 
   @Override
   void visit(ASTNode[] nodes, SourceUnit source) {
@@ -40,10 +44,13 @@ class AutoBreakASTTransformation extends ClassCodeVisitorSupport implements ASTT
     }
     this.sourceUnit = sourceUnit;
 
-    if (MY_TYPE != ((AnnotationNode) nodes[0]).classNode)
+    AnnotationNode annotation = (AnnotationNode) nodes[0]
+    AnnotatedNode target = (AnnotatedNode) nodes[1]
+
+    if (MY_TYPE != annotation.classNode)
       return
 
-    AnnotatedNode target = (AnnotatedNode) nodes[1]
+    includeEmptyCases = getMemberBooleanValue(annotation, 'includeEmptyCases')
     if (target instanceof ClassNode) {
       ((ClassNode) target).visitContents(this)
     } else if (target instanceof MethodNode) {
@@ -56,6 +63,16 @@ class AutoBreakASTTransformation extends ClassCodeVisitorSupport implements ASTT
     super.visitCaseStatement(statement)
     if (statement.code instanceof BlockStatement) {
       ((BlockStatement) statement.code).addStatement(new BreakStatement())
+    } else if (includeEmptyCases && statement.code instanceof EmptyStatement) {
+      statement.code = GeneralUtils.block(new BreakStatement())
     }
+  }
+
+  private static boolean getMemberBooleanValue(AnnotationNode annotation, String name) {
+    Expression member = annotation.getMember(name)
+    if (member instanceof ConstantExpression) {
+      return ((ConstantExpression) member).isTrueExpression()
+    }
+    return false
   }
 }
