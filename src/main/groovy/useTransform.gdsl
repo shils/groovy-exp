@@ -1,0 +1,17 @@
+contributor(context(scope: annotatedScope(ctype: "transform.Use"))) {
+  def m = enclosingMember()
+
+  if (m) {
+    def annotations = m.getAnnotations("transform.Use")
+    def clazz = enclosingClass()
+    if (clazz) {
+      annotations += clazz.getAnnotations("transform.Use")
+    }
+    for (a in annotations) {
+      def cat = a.findAttributeValue("value")?.bind()
+      if (cat) {
+        category cat.qualName
+      }
+    }
+  }
+}
