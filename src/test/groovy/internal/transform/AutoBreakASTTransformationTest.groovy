@@ -78,4 +78,142 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
       assert new Foo().test() == 1
     '''
   }
+
+  void testMethodAutoBreakOverridesClassAutoBreak() {
+    assertScript '''
+      @transform.AutoBreak(includeEmptyCases = true)
+      class Foo {
+
+        @transform.AutoBreak
+        int test() {
+          int result = 0
+          switch(1) {
+            case 1:
+            case 2:
+              result = 2
+            default:
+              result = 3
+          }
+          return result
+        }
+      }
+      assert new Foo().test() == 2
+    '''
+
+    assertScript '''
+      @transform.AutoBreak
+      class Foo {
+
+        @transform.AutoBreak(includeEmptyCases = true)
+        int test() {
+          int result = 0
+          switch(1) {
+            case 1:
+            case 2:
+              result = 2
+            default:
+              result = 3
+          }
+          return result
+        }
+      }
+      assert new Foo().test() == 0
+    '''
+  }
+
+  void testNestedClassAutoBreakOverridesOuterAutoBreak() {
+    assertScript '''
+      @transform.AutoBreak(includeEmptyCases = true)
+      class Foo {
+
+        @transform.AutoBreak
+        static class Bar {
+          int test() {
+            int result = 0
+            switch(1) {
+              case 1:
+              case 2:
+                result = 2
+              default:
+                result = 3
+            }
+            return result
+          }
+        }
+      }
+      assert new Foo.Bar().test() == 2
+    '''
+
+    assertScript '''
+      @transform.AutoBreak
+      class Foo {
+
+        @transform.AutoBreak(includeEmptyCases = true)
+        static class Bar {
+          int test() {
+            int result = 0
+            switch(1) {
+              case 1:
+              case 2:
+                result = 2
+              default:
+                result = 3
+            }
+            return result
+          }
+        }
+      }
+      assert new Foo.Bar().test() == 0
+    '''
+  }
+
+  void testTripleNestedAutoBreak() {
+    assertScript '''
+      @transform.AutoBreak
+      class Foo {
+
+        @transform.AutoBreak(includeEmptyCases = true)
+        static class Bar {
+
+          @transform.AutoBreak
+          int test() {
+            int result = 0
+            switch(1) {
+              case 1:
+              case 2:
+                result = 2
+              default:
+                result = 3
+            }
+            return result
+          }
+        }
+      }
+      assert new Foo.Bar().test() == 2
+    '''
+
+    assertScript '''
+      @transform.AutoBreak(includeEmptyCases = true)
+      class Foo {
+
+        @transform.AutoBreak
+        static class Bar {
+
+          @transform.AutoBreak(includeEmptyCases = true)
+          int test() {
+            int result = 0
+            switch(1) {
+              case 1:
+              case 2:
+                result = 2
+              default:
+                result = 3
+            }
+            return result
+          }
+        }
+      }
+      assert new Foo.Bar().test() == 0
+    '''
+  }
 }

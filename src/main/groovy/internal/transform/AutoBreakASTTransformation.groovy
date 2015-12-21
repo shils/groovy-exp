@@ -35,7 +35,7 @@ class AutoBreakASTTransformation extends ClassCodeVisitorSupport implements ASTT
   static final ClassNode MY_TYPE = ClassHelper.make(MY_CLASS)
 
   SourceUnit sourceUnit
-  private boolean includeEmptyCases
+  private Deque<Boolean> includeEmptyCasesStack = new ArrayDeque<Boolean>()
 
   @Override
   void visit(ASTNode[] nodes, SourceUnit source) {
@@ -50,12 +50,10 @@ class AutoBreakASTTransformation extends ClassCodeVisitorSupport implements ASTT
     if (MY_TYPE != annotation.classNode)
       return
 
-    includeEmptyCases = getMemberBooleanValue(annotation, 'includeEmptyCases')
-    if (target instanceof ClassNode) {
-      ((ClassNode) target).visitContents(this)
-    } else if (target instanceof MethodNode) {
-      visitClassCodeContainer(((MethodNode) target).code)
-    }
+    if (!(target instanceof ClassNode) && !(target instanceof MethodNode))
+      return
+
+    visitClassOrMethod(target)
   }
 
   @Override
@@ -63,9 +61,31 @@ class AutoBreakASTTransformation extends ClassCodeVisitorSupport implements ASTT
     super.visitCaseStatement(statement)
     if (statement.code instanceof BlockStatement) {
       ((BlockStatement) statement.code).addStatement(new BreakStatement())
-    } else if (includeEmptyCases && statement.code instanceof EmptyStatement) {
+    } else if (includeEmptyCasesStack.peek() && statement.code instanceof EmptyStatement) {
       statement.code = GeneralUtils.block(new BreakStatement())
     }
+  }
+
+  @Override
+  void visitClass(ClassNode clazz) {
+    visitClassOrMethod(clazz)
+  }
+
+  @Override
+  void visitMethod(MethodNode method) {
+    visitClassOrMethod(method)
+  }
+
+  private void visitClassOrMethod(AnnotatedNode node) {
+    if (node.putNodeMetaData(AutoBreakASTTransformation.class, true)) {
+      return
+    }
+
+    AnnotationNode annotation = node.getAnnotations(MY_TYPE)?.find()
+    boolean includeEmptyCases = annotation ? getMemberBooleanValue(annotation, 'includeEmptyCases') : includeEmptyCasesStack.peek()
+    includeEmptyCasesStack.push(includeEmptyCases)
+    node instanceof ClassNode ? super.visitClass((ClassNode) node) : super.visitMethod((MethodNode) node)
+    includeEmptyCasesStack.pop()
   }
 
   private static boolean getMemberBooleanValue(AnnotationNode annotation, String name) {
