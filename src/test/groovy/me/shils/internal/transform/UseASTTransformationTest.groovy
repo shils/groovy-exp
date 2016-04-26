@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 import org.codehaus.groovy.control.CompilationFailedException
 
@@ -6,7 +6,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testAnnotatedMethod() {
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.time.TimeCategory
       import groovy.time.TimeDuration
       import groovy.transform.CompileStatic
@@ -26,7 +26,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testAnnotatedClass() {
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.time.TimeCategory
       import groovy.time.TimeDuration
       import groovy.transform.CompileStatic
@@ -46,7 +46,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testAnnotatedMethodOverridesClass() {
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.time.TimeCategory
       import groovy.time.TimeDuration
       import groovy.transform.CompileStatic
@@ -79,7 +79,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testPropertyAccess() {
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.time.TimeCategory
       import groovy.time.TimeDuration
       import groovy.transform.CompileStatic
@@ -99,7 +99,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testUsingStaticClass() {
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.transform.CompileStatic
 
       @CompileStatic
@@ -125,7 +125,7 @@ class UseASTTransformationTest extends GroovyTestCase {
   void testPrimitiveTypeCompatibility() {
     assertScript '''
       import groovy.transform.CompileStatic
-      import transform.Use
+      import me.shils.transform.Use
 
       class PrimitiveCat {
         static int times(int a, int b) {
@@ -161,7 +161,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testFailOnNonCategoryClass() {
     shouldFail(CompilationFailedException, '''
-      import transform.Use
+      import me.shils.transform.Use
       @Use(B)
       class A {}
 
@@ -173,7 +173,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testMethodOverriding() {
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.transform.CompileStatic
 
       @CompileStatic
@@ -204,7 +204,7 @@ class UseASTTransformationTest extends GroovyTestCase {
 
   void testPropertyOverriding(){
     assertScript '''
-      import transform.Use
+      import me.shils.transform.Use
       import groovy.transform.CompileStatic
 
       @CompileStatic

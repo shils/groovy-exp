@@ -1,4 +1,4 @@
-package transform
+package me.shils.transform
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
 
@@ -12,7 +12,7 @@ import java.lang.annotation.Target
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
-@GroovyASTTransformationClass('internal.transform.UnsafeCacheASTTransformation')
+@GroovyASTTransformationClass('me.shils.internal.transform.UnsafeCacheASTTransformation')
 @interface UnsafeCache {
 
   /**

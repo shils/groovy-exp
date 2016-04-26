@@ -1,11 +1,11 @@
-package internal.transform
+package me.shils.internal.transform
 
 
 class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testNoFallThroughAfterNonEmptyCaseStatement() {
     assertScript '''
-      @transform.AutoBreak
+      @me.shils.transform.AutoBreak
       int test() {
         int result = 0
         switch(1) {
@@ -24,7 +24,7 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testFallThroughAfterEmptyCaseStatementByDefault() {
     assertScript '''
-      @transform.AutoBreak
+      @me.shils.transform.AutoBreak
       int test() {
         int result = 0
         switch(1) {
@@ -42,7 +42,7 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testBreakAfterEmptyCaseStatementWhenSpecified() {
     assertScript '''
-      @transform.AutoBreak(includeEmptyCases = true)
+      @me.shils.transform.AutoBreak(includeEmptyCases = true)
       int test() {
         int result = 0
         switch(1) {
@@ -60,7 +60,7 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testAutoBreakOnClass() {
     assertScript '''
-      @transform.AutoBreak
+      @me.shils.transform.AutoBreak
       class Foo {
         int test() {
           int result = 0
@@ -81,10 +81,10 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testMethodAutoBreakOverridesClassAutoBreak() {
     assertScript '''
-      @transform.AutoBreak(includeEmptyCases = true)
+      @me.shils.transform.AutoBreak(includeEmptyCases = true)
       class Foo {
 
-        @transform.AutoBreak
+        @me.shils.transform.AutoBreak
         int test() {
           int result = 0
           switch(1) {
@@ -101,10 +101,10 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
     '''
 
     assertScript '''
-      @transform.AutoBreak
+      @me.shils.transform.AutoBreak
       class Foo {
 
-        @transform.AutoBreak(includeEmptyCases = true)
+        @me.shils.transform.AutoBreak(includeEmptyCases = true)
         int test() {
           int result = 0
           switch(1) {
@@ -123,10 +123,10 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testNestedClassAutoBreakOverridesOuterAutoBreak() {
     assertScript '''
-      @transform.AutoBreak(includeEmptyCases = true)
+      @me.shils.transform.AutoBreak(includeEmptyCases = true)
       class Foo {
 
-        @transform.AutoBreak
+        @me.shils.transform.AutoBreak
         static class Bar {
           int test() {
             int result = 0
@@ -145,10 +145,10 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
     '''
 
     assertScript '''
-      @transform.AutoBreak
+      @me.shils.transform.AutoBreak
       class Foo {
 
-        @transform.AutoBreak(includeEmptyCases = true)
+        @me.shils.transform.AutoBreak(includeEmptyCases = true)
         static class Bar {
           int test() {
             int result = 0
@@ -169,13 +169,13 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
 
   void testTripleNestedAutoBreak() {
     assertScript '''
-      @transform.AutoBreak
+      @me.shils.transform.AutoBreak
       class Foo {
 
-        @transform.AutoBreak(includeEmptyCases = true)
+        @me.shils.transform.AutoBreak(includeEmptyCases = true)
         static class Bar {
 
-          @transform.AutoBreak
+          @me.shils.transform.AutoBreak
           int test() {
             int result = 0
             switch(1) {
@@ -193,13 +193,13 @@ class AutoBreakASTTransformationTest extends GroovyTestCase {
     '''
 
     assertScript '''
-      @transform.AutoBreak(includeEmptyCases = true)
+      @me.shils.transform.AutoBreak(includeEmptyCases = true)
       class Foo {
 
-        @transform.AutoBreak
+        @me.shils.transform.AutoBreak
         static class Bar {
 
-          @transform.AutoBreak(includeEmptyCases = true)
+          @me.shils.transform.AutoBreak(includeEmptyCases = true)
           int test() {
             int result = 0
             switch(1) {

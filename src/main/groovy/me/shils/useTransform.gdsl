@@ -1,11 +1,13 @@
-contributor(context(scope: annotatedScope(ctype: "transform.Use"))) {
+package me.shils
+
+contributor(context(scope: annotatedScope(ctype: "me.shils.transform.Use"))) {
   def m = enclosingMember()
 
   if (m) {
-    def annotations = m.getAnnotations("transform.Use")
+    def annotations = m.getAnnotations("me.shils.transform.Use")
     def clazz = enclosingClass()
     if (clazz) {
-      annotations += clazz.getAnnotations("transform.Use")
+      annotations += clazz.getAnnotations("me.shils.transform.Use")
     }
     for (a in annotations) {
       def cat = a.findAttributeValue("value")?.bind()

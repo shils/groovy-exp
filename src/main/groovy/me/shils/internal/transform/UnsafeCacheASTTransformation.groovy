@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
@@ -19,7 +19,7 @@ import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
-import transform.UnsafeCache
+import me.shils.transform.UnsafeCache
 
 import static org.codehaus.groovy.ast.tools.GeneralUtils.assignS
 import static org.codehaus.groovy.ast.tools.GeneralUtils.assignX

@@ -1,4 +1,4 @@
-package customizers
+package me.shils.customizers
 
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport

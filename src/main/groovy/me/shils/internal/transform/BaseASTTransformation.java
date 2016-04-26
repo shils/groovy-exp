@@ -1,4 +1,4 @@
-package internal.transform;
+package me.shils.internal.transform;
 
 import org.codehaus.groovy.ast.ASTNode;
 import org.codehaus.groovy.ast.AnnotatedNode;

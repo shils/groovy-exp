@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ASTNode
@@ -13,7 +13,7 @@ import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
-import transform.Fluent
+import me.shils.transform.Fluent
 import static org.codehaus.groovy.ast.ClassHelper.make
 import static org.codehaus.groovy.ast.tools.GeneralUtils.assignS
 import static org.codehaus.groovy.ast.tools.GeneralUtils.param

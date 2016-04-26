@@ -1,10 +1,10 @@
-package internal.transform
+package me.shils.internal.transform
 
 class UnsafeCacheASTTransformationTest extends GroovyTestCase {
 
   void testCaching() {
     assertScript '''
-      import transform.UnsafeCache
+      import me.shils.transform.UnsafeCache
 
       class A {
 

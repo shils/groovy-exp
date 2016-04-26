@@ -1,21 +1,18 @@
-package transform
+package me.shils.transform
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
-
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Target
 
 /**
+ * Local variable level annotation used to emulate C style local static variables.
+ *
  * @author Shil Sinha
  */
+@Target(ElementType.LOCAL_VARIABLE)
 @Retention(RetentionPolicy.SOURCE)
-@Target([ElementType.METHOD, ElementType.TYPE])
-@GroovyASTTransformationClass('internal.transform.UseASTTransformation')
-@interface Use {
-
-  Class value()
-
-  boolean override() default false
+@GroovyASTTransformationClass('me.shils.internal.transform.LocalStaticASTTransformation')
+@interface LocalStatic {
 }

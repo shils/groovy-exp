@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
@@ -9,7 +9,7 @@ class LocalStaticASTTransformationTest extends GroovyShellTestCase {
   @Override
   protected GroovyShell createNewShell() {
     def icz = new ImportCustomizer()
-            .addImports('transform.LocalStatic', 'groovy.transform.ASTTest')
+            .addImports('me.shils.transform.LocalStatic', 'groovy.transform.ASTTest')
             .addStaticStars('org.codehaus.groovy.control.CompilePhase')
     def config = new CompilerConfiguration().addCompilationCustomizers(icz)
     new GroovyShell(config)

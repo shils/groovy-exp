@@ -1,11 +1,11 @@
-package internal.transform
+package me.shils.internal.transform
 
 
 class LazyGStringASTTransformationTest extends GroovyTestCase {
 
   void testLazyEvaluation() {
     assertScript '''
-      import transform.LazyGString
+      import me.shils.transform.LazyGString
       import groovy.transform.CompileStatic
 
       @LazyGString

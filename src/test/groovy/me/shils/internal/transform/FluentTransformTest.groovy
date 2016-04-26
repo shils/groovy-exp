@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 
 
@@ -7,7 +7,7 @@ class FluentTransformTest extends GroovyTestCase {
   void testBasicFunctionality() {
     assertScript '''
       import groovy.transform.CompileStatic
-      import transform.Fluent
+      import me.shils.transform.Fluent
 
       @Fluent
       class Foo {

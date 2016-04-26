@@ -1,4 +1,4 @@
-package transform
+package me.shils.transform
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
 
@@ -6,11 +6,16 @@ import java.lang.annotation.ElementType
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Target
+
 /**
  * @author Shil Sinha
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
-@GroovyASTTransformationClass('internal.transform.FluentASTTransformation')
-@interface Fluent {
+@Target([ElementType.METHOD, ElementType.TYPE])
+@GroovyASTTransformationClass('me.shils.internal.transform.UseASTTransformation')
+@interface Use {
+
+  Class value()
+
+  boolean override() default false
 }

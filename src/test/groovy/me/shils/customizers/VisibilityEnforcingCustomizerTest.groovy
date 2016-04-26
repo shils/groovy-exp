@@ -1,4 +1,4 @@
-package customizers
+package me.shils.customizers
 
 import org.codehaus.groovy.control.CompilerConfiguration
 

@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ASTNode
@@ -6,23 +6,19 @@ import org.codehaus.groovy.ast.AnnotatedNode
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassCodeExpressionTransformer
 import org.codehaus.groovy.ast.ClassNode
-import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.expr.ClosureExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.expr.GStringExpression
-import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.tools.GeneralUtils
 import org.codehaus.groovy.classgen.VariableScopeVisitor
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
-import transform.LazyGString
+import me.shils.transform.LazyGString
 
 import static GeneralUtils.block
-import static org.codehaus.groovy.ast.tools.GeneralUtils.constX
-import static org.codehaus.groovy.ast.tools.GeneralUtils.returnS
 import static org.codehaus.groovy.ast.ClassHelper.make
 import static org.codehaus.groovy.ast.tools.GeneralUtils.stmt
 

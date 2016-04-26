@@ -1,4 +1,4 @@
-package internal.transform
+package me.shils.internal.transform
 
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotatedNode
@@ -19,7 +19,7 @@ import org.codehaus.groovy.ast.expr.PropertyExpression
 import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.transform.GroovyASTTransformation
-import transform.LocalStatic
+import me.shils.transform.LocalStatic
 
 import java.lang.reflect.Modifier
 

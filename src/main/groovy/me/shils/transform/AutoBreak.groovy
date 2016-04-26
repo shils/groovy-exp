@@ -1,4 +1,4 @@
-package transform
+package me.shils.transform
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
 
@@ -15,7 +15,7 @@ import java.lang.annotation.Target
  */
 @Retention(RetentionPolicy.CLASS)
 @Target([ElementType.TYPE, ElementType.METHOD])
-@GroovyASTTransformationClass('internal.transform.AutoBreakASTTransformation')
+@GroovyASTTransformationClass('me.shils.internal.transform.AutoBreakASTTransformation')
 @interface AutoBreak {
 
   boolean includeEmptyCases() default false

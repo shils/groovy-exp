@@ -1,4 +1,4 @@
-package transform
+package me.shils.transform
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
 
@@ -12,6 +12,6 @@ import java.lang.annotation.Target
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-@GroovyASTTransformationClass('internal.transform.LazyGStringASTTransformation')
+@GroovyASTTransformationClass('me.shils.internal.transform.LazyGStringASTTransformation')
 @interface LazyGString {
 }
