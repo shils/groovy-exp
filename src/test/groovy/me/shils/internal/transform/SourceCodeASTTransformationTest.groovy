@@ -5,7 +5,11 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 class SourceCodeASTTransformationTest extends GroovyShellTestCase {
+
   @Override
   protected GroovyShell createNewShell() {
     def icz = new ImportCustomizer().addImports('me.shils.transform.SourceCode')
@@ -39,6 +43,28 @@ class SourceCodeASTTransformationTest extends GroovyShellTestCase {
     '''
     results.values().each {
       assert it.getAnnotation(SourceCode).value().contains("class ${it.getSimpleName()} {".toString())
+    }
+  }
+
+  void testGSECompatibility() {
+    Path tmpDir = null
+    File script = null
+    try {
+      tmpDir = Files.createTempDirectory('tmp' + getClass().simpleName)
+      script = new File(tmpDir.toFile(), 'Pls')
+      script << '''
+        class Foo {}
+        [Foo: Foo, Pls: getClass()]
+      '''
+      def gse = new GroovyScriptEngine([tmpDir.toUri().toURL()] as URL[])
+      gse.config = new CompilerConfiguration().addCompilationCustomizers(new ASTTransformationCustomizer(SourceCode))
+      Map<String, Class> results = gse.run('Pls', new Binding())
+      results.values().each {
+        assert it.getAnnotation(SourceCode).value() == script.text
+      }
+    } finally {
+      tmpDir?.deleteDir()
+      script?.delete()
     }
   }
 }

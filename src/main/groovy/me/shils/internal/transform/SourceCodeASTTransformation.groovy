@@ -30,6 +30,11 @@ class SourceCodeASTTransformation extends AbstractASTTransformation {
     AnnotationNode annotationNode = (AnnotationNode) nodes[0]
     AnnotatedNode annotatedNode = (AnnotatedNode) nodes[1]
 
+    //workaround for GROOVY-8402
+    if (annotatedNode.putNodeMetaData(SourceCodeASTTransformation, true)) {
+      return
+    }
+
     if (MY_TYPE != annotationNode.classNode) {
       return
     }
