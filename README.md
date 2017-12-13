@@ -1,4 +1,4 @@
-Some experimental Groovy code... featuring:
+Experimental AST transformations featuring:
 
 
 ### @AutoBreak
