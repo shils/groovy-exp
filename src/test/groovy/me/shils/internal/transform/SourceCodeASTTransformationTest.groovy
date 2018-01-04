@@ -46,6 +46,15 @@ class SourceCodeASTTransformationTest extends GroovyShellTestCase {
     }
   }
 
+  void testDifferentClassesCompiledUsingSameCustomizer() {
+    def config = new CompilerConfiguration().addCompilationCustomizers(new ASTTransformationCustomizer(SourceCode))
+    def gcl = new GroovyClassLoader(Thread.currentThread().getContextClassLoader(), config)
+    Class Foo = gcl.parseClass('class Foo {}')
+    Class Bar = gcl.parseClass('class Bar {}')
+    assert Foo.getAnnotation(SourceCode).value() == 'class Foo {}'
+    assert Bar.getAnnotation(SourceCode).value() == 'class Bar {}'
+  }
+
   void testGSECompatibility() {
     Path tmpDir = null
     File script = null

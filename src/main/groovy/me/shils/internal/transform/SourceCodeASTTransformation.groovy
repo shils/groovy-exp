@@ -42,18 +42,18 @@ class SourceCodeASTTransformation extends AbstractASTTransformation {
       return
     }
 
-    String sourceCode = getMemberStringValue(annotationNode, 'value')
     boolean appliedByCustomizer = !annotatedNode.getAnnotations(MY_TYPE)
-    if (!appliedByCustomizer && sourceCode) {
+    if (!appliedByCustomizer && getMemberStringValue(annotationNode, 'value')) {
       addError("$MY_TYPE_NAME#value must not be set prior to compilation.", annotationNode)
       return
     }
 
+    String sourceCode = source.getAST().getNodeMetaData(SourceCodeASTTransformation)
     if (!sourceCode) {
       sourceCode = source.source.reader.text
       if (appliedByCustomizer) {
-        //cache value in dummy annotation for other classes in source unit
-        annotationNode.setMember('value', GeneralUtils.constX(sourceCode))
+        //cache value in module node for other classes in source unit
+        source.getAST().putNodeMetaData(SourceCodeASTTransformation, sourceCode)
       }
     }
 
